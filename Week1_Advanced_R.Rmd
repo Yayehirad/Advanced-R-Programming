@@ -1,0 +1,136 @@
+---
+title: "Control Structures"
+author: "Yayehirad A Melsew"
+date: "29/05/2021"
+output: html_document
+---
+
+
+# Control Structures Overview
+control structures allow you to put some "logic" into your R code, rather than just always executing the same R code every time.
+Commonly used control structures are
+
+if and else: testing a condition and acting on it
+for: execute a loop a fixed number of times
+break: break the execution of a loop
+next: skip an iteration of a loop
+## 1 if-else
+```{r}
+if(<condition>){
+  #do something
+}
+#continue with rest of code
+```
+The above code does nothing if the condition is false. If you have an action you want to execute when the condition is false, then you need an else clause.
+```{r}
+if(<condition>) {
+      ## do something
+}
+else {
+      ## do something else
+}
+```
+You can have a series of tests by following the initial if with any number of else ifs.
+```{r}
+if(<condition1>) {
+      ## do something
+} else if(<condition2>) {
+      ## do something different
+} else {
+      ## do something different
+}
+```
+
+```{r}
+## Generate a uniform random number
+x <- runif(1, 0, 10)
+if(x > 3) {
+        y <- 10
+} else {
+        y <- 0
+}
+
+# or
+x <- runif(1, 0, 10)
+if(x > 3) {
+        print("y <- 10")
+} else {
+       print("y <- 0")
+}
+```
+## 2. for loops
+In R, for loops take an iterator variable and assign it successive values from a sequence or vector. For loops are most commonly used for iterating over the elements of an object (list, vector, etc.)
+```{r}
+numbers <- rnorm(10)
+print(numbers)
+#with for loop
+for (i in 1:10){
+  print(numbers[i])
+}
+
+```
+The seq_along() function is commonly used in conjunction with for loops in order to generate an integer sequence based on the length of an object (in this case, the object x).
+```{r}
+x <- c("a", "b", "c", "d")
+for(i in 1:4) {
+        ## Print out each element of 'x'
+        print(x[i])  
+}
+#or
+## Generate a sequence based on length of 'x'
+for(i in seq_along(x)) {   
+        print(x[i])
+}
+#or
+for(letter in x) {
+        print(letter)
+}
+#or
+for(i in 1:4) print(x[i])
+```
+However, curly braces are sometimes useful even for one-line loops, because that way if you decide to expand the loop to multiple lines, you won't be burned because you forgot to add curly braces (and you will be burned by this).
+
+## 3. Nested for loops
+for loops can be nested inside of each other.
+```{r}
+x <- matrix(1:6, 2, 3)
+
+for(i in seq_len(nrow(x))) {
+        for(j in seq_len(ncol(x))) {
+                print(x[i, j])
+        }   
+}
+```
+
+Nested loops are commonly needed for multidimensional or hierarchical data structures (e.g. matrices, lists). Be careful with nesting though. Nesting beyond 2 to 3 levels often makes it difficult to read or understand the code. If you find yourself in need of a large number of nested loops, you may want to break up the loops by using functions (discussed later).
+
+## 4. next, break
+next is used to skip an iteration of a loop.
+```{r}
+for(i in 1:100) {
+        if(i <= 20) {
+                ## Skip the first 20 iterations
+                next                 
+        }
+        ## Do something here
+}
+```
+
+break is used to exit a loop immediately, regardless of what iteration the loop may be on.
+```{r}
+for(i in 1:100) {
+      print(i)
+
+      if(i > 20) {
+              ## Stop loop after 20 iterations
+              break  
+      }     
+}
+```
+
+Summary
+Control structures like if-else and for allow you to control the flow of an R program
+Control structures mentioned here are primarily useful for writing programs; for command-line interactive work, the "apply" functions are typically more useful.
+
+
+
