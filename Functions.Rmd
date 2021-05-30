@@ -117,7 +117,111 @@ num_download <- function(pkgname, date = "2016-07-20") {
         cran %>% filter(package == pkgname) %>% nrow
 }    
 ```
-Dependency Checking
+
+# Example Dependency Checking
+The num_downloads() function depends on the readr and dplyr packages. Without them installed, the function won't run. Sometimes it is useful to check to see that the needed packages are installed so that a useful error message (or other behavior) can be provided for the user.
+
+We can write a separate function to check that the packages are installed.
+For example, in the above function, if the readr package is not available, we go ahead and install the package for the user (along with providing a message). However, if we cannot load the dplyr package we throw an error. This distinction in behaviors for readr and dplyr is a bit arbitrary in this case, but it illustrates the flexibility that is afforded by usingrequire() versus library().
+```{r}
+check_pkg_deps <- function() {
+        if(!require(readr)) {
+                message("installing the 'readr' package")
+                install.packages("readr")
+        }
+        if(!require(dplyr))
+                stop("the 'dplyr' package needs to be installed first")
+}
+```
+The require() function is similar to library(), however library() stops with an error if the package cannot be loaded whereas require() returns TRUE or FALSE depending on whether the package can be loaded or not. 
+- require() is good for programming because you may want to engage in different behaviors depending on which packages are not available.
+- library() is good for interactive work because you usually can't go on without a specific package
+
+```{r}
+num_download <- function(pkgname, date = "2016-07-20") {
+        check_pkg_deps()
+        dest <- check_for_logfile(date)
+        cran <- read_csv(dest, col_types = "ccicccccci", progress = FALSE)
+        cran %>% filter(package == pkgname) %>% nrow
+}
+```
+Now, our updated function can check for package dependencies.
+
+# Example Vectorization
+One final aspect of this function that is worth noting is that as currently written it is not vectorized.
+This means that each argument must be a single value---a single package name and a single date. However, in R, it is a common paradigm for functions to take vector arguments and for those functions to return vector or list results. Often, users are bitten by unexpected behavior because a function is assumed to be vectorized when it is not.
+One way to vectorize this function is to allow the pkgname argument to be a character vector of package names. This way we can get download statistics for multiple packages with a single function call. Luckily, this is fairly straightforward to do. The two things we need to do are
+
+1. Adjust our call to filter() to grab rows of the data frame that fall within a vector of package names
+2. Use a group_by() %>% summarize() combination to count the downloads for each package.
+```{r}
+## 'pkgname' can now be a character vector of names
+num_download <- function(pkgname, date = "2016-07-20") {
+        check_pkg_deps()
+        dest <- check_for_logfile(date)
+        cran <- read_csv(dest, col_types = "ccicccccci", progress = FALSE)
+        cran %>% filter(package %in% pkgname) %>% 
+                group_by(package) %>%
+                summarize(n = n())
+}    
+```
+Now we can call the following
+```{r}
+num_download(c("filehash", "weathermetrics"))
+# A tibble: 2 × 2
+         package     n
+           <chr> <int>
+1       filehash   179
+2 weathermetrics     7
+```
+Note that the output of num_download() has changed. While it previously returned an integer vector, the vectorized function returns a data frame. If you are authoring a function that is used by many people, it is usually wise to give them some warning before changing the nature of the output.
+Vectorizing the date argument is similarly possible, but it has the added complication that for each date you need to download another log file. We leave this as an exercise for the reader.
+#  Example Argument Checking
+Checking that the arguments supplied by the reader are proper is a good way to prevent confusing results or error messages from occurring later on in the function. It is also a useful way to enforce documented requirements for a function.
+
+In this case, the num_download() function is expecting both the pkgname and date arguments to be character vectors. In particular, the date argument should be a character vector of length 1. We can check the class of an argument using is.character() and the length using the length() function.
+
+The revised function with argument checking is as follows.
+```{r}
+num_download <- function(pkgname, date = "2016-07-20") {
+        check_pkg_deps()
+
+        ## Check arguments
+        if(!is.character(pkgname))
+                stop("'pkgname' should be character")
+        if(!is.character(date))
+                stop("'date' should be character")
+        if(length(date) != 1)
+                stop("'date' should be length 1")
+
+        dest <- check_for_logfile(date)
+        cran <- read_csv(dest, col_types = "ccicccccci", 
+                         progress = FALSE)
+        cran %>% filter(package %in% pkgname) %>% 
+                group_by(package) %>%
+                summarize(n = n())
+}    
+```
+
+# When Should I Write a Function?
+- If you're going to do something once (that does happen on occasion), just write some code and document it very well. The important thing is that you want to make sure that you understand what the code does, and so that requires both writing the code well and writing documentation. You want to be able to reproduce it later on if you ever come back to it, or if someone else comes back to it.
+- If you're going to do something twice, write a function. This allows you to abstract a small piece of code, and it forces you to define an interface, so you have well defined inputs and outputs.
+- If you're going to do something three times or more, you should think about writing a small package. It doesn't have to be commercial level software, but a small package which encapsulates the set of operations that you're going to be doing in a given analysis. It's also important to write some real documentation so that people can understand what's supposed to be going on, and can apply the software to a different situation if they have to.
+
+HUOEp4HowByPGWze
+
+If you want to see the source code for any function, just type the function name without any arguments or
+| parentheses.
+
+
+
+
+
+
+
+
+
+
 
 
 
