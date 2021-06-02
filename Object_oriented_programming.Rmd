@@ -1,0 +1,35 @@
+---
+title: "Object oriented programming"
+author: "Yayehirad A Melsew"
+date: "02/06/2021"
+output: html_document
+---
+# OOP Overview
+Object oriented programming is one of the most successful and widespread philosophies of programming and is a cornerstone of many programming languages including Java, Ruby, Python, and C++. 
+ R has three object oriented systems: The two older object oriented systems in R are called S3 and S4, and the modern system is called RC which stands for “reference classes.” 
+ 
+# Object Oriented Principles
+There a several key principles in object oriented programming which span across R’s object systems and other programming languages. The first are the ideas of a class and an object. 
+A class is a blueprint for an object: it describes the parts of an object, how to make an object, and what the object is able to do.
+# S3
+Conveniently everything in R is an object. By “everything” I mean every single “thing” in R including numbers, functions, strings, data frames, lists, etc. If you want to know the class of an object in R you can simply use the class() function:
+ In the S3 system you can arbitrarily assign a class to any object, which goes against most of what we discussed in the Object Oriented Principles section. Class assignments can be made using thestructure() function, or you can assign the class using class()and <-:
+ 
+```{r}
+class(1)
+special_num_1<- structure(1, class="special_number")
+special_num_1
+special_num_2<-2
+class(special_num_2)<- "special_number"
+
+
+```
+
+
+
+
+
+
+
+
+

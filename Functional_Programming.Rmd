@@ -41,7 +41,7 @@ map_lgl(c(1, 2, 3, 4, 5), gt, b = 3)
 #[1] FALSE FALSE FALSE  TRUE  TRUE
 ```
  A predicate function is a function that returns TRUE or FALSE for each element in the provided list or vector
- The map_if() function takes as its arguments a list or vector containing data, a predicate function, and then a function to be applied. A predicate function is a function that returns TRUE orFALSE for each element in the provided list or vector. In the case ofmap_if(): if the predicate functions evaluates to TRUE, then the function is applied to the corresponding vector element, however if the predicate function evaluates to FALSE then the function is not applied. The map_if() function always returns a list, so I’m piping the result of map_if() to unlist() so it look prettier:Notice how only the even numbers are squared, while the odd numbers are left alone.
+ The map_if() function takes as its arguments a list or vector containing data, a predicate function, and then a function to be applied. A predicate function is a function that returns TRUE orFALSE for each element in the provided list or vector. In the case of map_if(): if the predicate functions evaluates to TRUE, then the function is applied to the corresponding vector element, however if the predicate function evaluates to FALSE then the function is not applied. The map_if() function always returns a list, so I’m piping the result of map_if() to unlist() so it look prettier:Notice how only the even numbers are squared, while the odd numbers are left alone.
 ```{r}
 map_if(1:5, function(x){
               x %% 2 == 0
@@ -75,11 +75,156 @@ List or vector reduction iteratively combines the first element of a vector with
 | combined result is combined with the third element of the vector, and so on until the end of the vector is reached. The
 | function to be applied should take at least two arguments. Where mapping returns a vector or a list, reducing should return a
 | single value.
+# Summary
+- Functional programming is based on lambda calculus.
+- This approach concentrates on data, variables, functions, and function applications.
+- It’s possible for functions to be able to return other functions.
+- The core functional programming concepts can be summarized in the following categories: map, reduce, search, filter, and compose.
+- Partial application of functions allows functions to be used like data structures.
+- Side effects are difficult to debug although they motivate a huge fraction of computer programming.
+- The most important part of understanding recursion is understanding recursion.
 
+# Expressions
+use quote function to create your expression
+```{r}
+two_plus_five <- quote(2+5)
+#look your new expression
+two_plus_five
+#or evaluate
+eval(two_plus_five)
+```
+You might encounter R code that is stored as a string that you want to evaluate with eval(). You can use parse() to transform a string into an expression:
+```{r}
+tpt_string <- "2 + 2"
 
+tpt_expression <- parse(text = tpt_string)
 
+eval(tpt_expression)
+#You can reverse this process and transform an expression into a string using deparse():
+deparse(two_plus_two)
+```
+# Environments
+Environments are data structures in R that have special properties with regard to their role in how R code is executed and how memory in R is organized. You may not realize it but you’re probably already familiar with one environment called the global environment. Environments formalize relationships between variable names and values. When you enter x <- 55 into the R console what you’re saying is: assign the value of 55 to a variable called x, and store this assignment in the global environment. The global environment is therefore where most R users do most of their programming and analysis.
 
+You can create a new environment using new.env(). You can assign variables in that environment in a similar way to assigning a named element of a list, or you can use assign(). You can retrieve the value of a variable just like you would retrieve the named element of a list, or you can use get(). Notice that assign() and get() are opposites:
+```{r}
+my_new_env <- new.env()
+my_new_env$x <- 4
+my_new_env$x
+assign("y",9,envir = my_new_env)
+get("y",envir = my_new_env)
 
+#get all names
+ls(my_new_env)
+# remove asignment
+rm(y,envir = my_new_env)
+#check
+exists("y",envir = my_new_env)
+exists("x",envir = my_new_env)
+```
+
+Environments are organized in parent/child relationships such that every environment keeps track of its parent, but parents are unaware of which environments are their children. Usually the relationships between environments is not something you should try to directly control. You can see the parents of the global environment using the search() function:
+
+# Execution Environments
+Although there may be several cases where you need to create a new environment using new.env(), you will more often create new environments whenever you execute functions. An execution environment is an environment that exists temporarily within the scope of a function that is being executed. For example if we have the following code:
+
+```{r}
+x <- 10
+
+my_func <- function(){
+  x <- 5
+  return(x)
+}
+
+my_func()
+#5
+```
+So what exactly is happening above? First the name x is being assigned the value 10 in the global environment. Then the namemy_func is being assigned the value of the function function(){x <- 5};return(x)} in the global environment. When my_func() is executed, a new environment is created called the execution environment which only exists while my_func() is running. Inside of the execution environment the name x is assigned the value 5. Whenreturn() is executed it looks first in the execution environment for a value that is assigned to x. Then the value 5 is returned. In contrast to the situation above, take a look at this variation:
+```{r}
+x <- 10
+
+another_func <- function(){
+  return(x)
+}
+
+another_func()
+#[1] 10
+```
+In this situation the execution environment inside of another_func()does not contain an assignment for the name x, so R looks for an assignment in the parent environment of the execution environment which is the global environment. Since x is assigned the value 10 in the global environment 10 is returned.
+
+After seeing the cases above you may be curious if it’s possible for an execution environment to manipulate the global environment. You’re already familiar with the assignment operator <-, however you should also be aware that there’s another assignment operator called the complex assignment operator which looks like <<-. You can use the complex assignment operator to re-assign or even create name-value bindings in the global environment from within an execution environment. In this first example, the function assign1() will change the value associated with the name x:
+
+```{r}
+x <- 10
+x
+#[1] 10
+
+assign1 <- function(){
+  x <<- "Wow!"
+}
+
+assign1()
+x
+#[1] "Wow!"
+
+```
+# Error handling and Generation
+Errors most often occur when code is used in a way that it is not intended to be used. 
+In R there are two other constructs in R which are both related to errors: warnings and messages. 
+Warnings are meant to indicate that something seems to have gone wrong in your program which should be inspected. 
+Messages simply print test to the R console, though they are generated by an underlying mechanism that is similar to how errors and warning are generated. 
+# Generating Errors
+There are a few essential functions for generating errors, warnings, and messages in R. The stop() function will generate an error. Let's generate an error:
+```{r}
+stop("Something erroneous has occured!")
+#Error: Something erroneous has occured!
+name_of_func <- function(){stop("Something bad happened.")}
+
+name_of_func()
+```
+The stopifnot() function takes a series of logical expressions as arguments and if any of them are false an error is generated specifying which expression is false. Let's take a look at an example:
+
+```{r}
+error_if_n_is_greater_than_zero <- function(n){
+  stopifnot(n <= 0)
+  n
+}
+
+error_if_n_is_greater_than_zero(5)
+```
+The warning() function creates a warning, and the function itself is very similar to the stop() function. Remember that a warning does not stop the execution of a program (unlike an error.)
+```{r}
+warning("Consider yourself warned!")
+
+make_NA <- function(x){
+  warning("Generating an NA.")
+  NA
+}
+
+make_NA("Sodium")
+```
+
+Messages are simpler than errors or warnings, they just print strings to the R console. You can issue a message with the message() function:
+```{r}
+message("In a bottle.")
+```
+# When to generate errors or warnings
+Stopping the execution of your program with stop() should only happen in the event of a catastrophe - meaning only if it is impossible for your program to continue. If there are conditions that you can anticipate that would cause your program to create an error then you should document those conditions so whoever uses your software is aware. Common failure conditions like providing invalid arguments to a function should be checked at the beginning of your program so that the user can quickly realize something has gone wrong. This is case of checking function inputs is a typical use of thestopifnot() function.
+
+You can think of a function as kind of contract between you and the user: if the user provides specified arguments your program will provide predictable results. Of course it's impossible for you to anticipate all of the potential uses of your program, so the results of executing a function can only be predictable with regard to the type of the result. It's appropriate to create a warning when this contract between you and the user is violated. 
+If you think your program should produce a message, make sure that the output of the message is primarily meant for a human to read.
+# How should errors be handled?
+Proper error handling is an essential tool for any software developer so that you can design programs that are error tolerant. Creating clear and informative error messages is essential for building quality software. One closing tip I recommend is to put documentation for your software online, including the meaning of the errors that your software can potentially throw. Often a user's first instinct when encountering an error is to search online for that error message, which should lead them to your documentation!
+#note
+Notice that by using `is.numeric()` before the "AND" operator (`&&`) the expression `n %% 2 == 0` is never evaluated. This is a programming language design feature called "short circuiting." The expression can never evaluate to `TRUE` if the left hand side of `&&` evaluates to `FALSE`, so the right hand side is ignored.
+
+```{r}
+print("Hanos is a Gombaying Girl!")
+```
+#Summary
+Expressions are a powerful tool for manipulating and executing R code.
+Environments record associations between names and values.
+Execution environments create a scope for variable names inside of functions.
 
 
 

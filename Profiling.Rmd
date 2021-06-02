@@ -1,0 +1,61 @@
+---
+title: "Profiling"
+author: "Yayehirad A Melsew"
+date: "02/06/2021"
+output: html_document
+---
+# Profiling
+Some of the R code that you write will be slow. Slow code often isn’t worth fixing in a script that you will only evaluate a few times, as the time it will take to optimize the code will probably exceed the time it takes the computer to run it. However, if you are writing functions that will be used repeatedly, it is often worthwhile to identify slow sections of the code so you can try to improve speed in those sections.
+
+In this section, we will introduce the basics of profiling R code, using functions from two packages, microbenchmark and profvis. 
+#microbenchmark
+The microbenchmark package is useful for running small sections of code to assess performance, as well as for comparing the speed of several functions that do the same thing. 
+The microbenchmarkfunction from this package will run code multiple times (100 times is the default) and provide summary statistics describing how long the code took to run across those iterations. The process of timing a function takes a certain amount of time itself. The microbenchmark() function adjusts for this overhead time by running a certain number of “warm-up” iterations before running the iterations used to time the code.
+
+You can use the times argument in microbenchmark to customize how many iterations are used. For example, if you are working with a function that is a bit slow, you might want to run the code fewer times when benchmarking (although with slower or more complex code, it likely will make more sense to use a different tool for profiling, likeprofvis).
+
+You can include multiple lines of code within a single call tomicrobenchmark. However, to get separate benchmarks of line of code, you must separate each line by a comma:
+
+```{r}
+
+library(microbenchmark)
+microbenchmark(a <- rnorm(10), 
+               b <- mean(rnorm(10)))
+
+```
+The microbenchmark function is particularly useful for comparing functions that take the same inputs and return the same outputs. It’s useful to check next to see if the relative performance of the two functions is similar for a bigger data set. The microbenchmark function returns an object of the “microbenchmark” class. This class has two methods for plotting results, autoplot.microbenchmark and boxplot.microbenchmark. To use the autoplot method, you will need to have ggplot2loaded in your R session.
+
+# profvis
+Once you’ve identified slower code, you’ll likely want to figure out which parts of the code are causing bottlenecks. The profvisfunction from the profvis package is very useful for this type of profiling. 
+This function uses the RProf function from base R to profile code, and then displays it in an interactive visualization in RStudio. This profiling is done by sampling, with the RProf function writing out the call stack every 10 milliseconds while running the code.
+# Summary
+Profiling can help you identify bottlenecks in R code.
+The microbenchmark package helps you profile short pieces of code and compare functions with each other. It runs the code many times and provides summary statistics across the iterations.
+The profvis package allows you to visualize performance across more extensive code. It can be used to profile code within functions being developed for a package, as long as the package source code has been loaded locally using devtools::load_all.
+
+# Non-standard evaluation
+Functions from packages like dplyr, tidyr, and ggplot2 are excellent for creating efficient and easy-to-read code that cleans and displays data. However, they allow shortcuts in calling columns in data frames that allow some room for ambiguity when you move from evaluating code interactively to writing functions for others to use. 
+
+When you write a function for others to use, you need to avoid non-standard evaluation and so avoid all of these functions (culprits include many dplyr and tidyr functions– including mutate, select,filter, group_by, summarize, gather, spread– but also some functions in ggplot2, including aes). Fortunately, these functions all have standard evaluation alternatives, which typically have the same function name followed by an underscore (for example, the standard evaluation version of mutate is mutate_).
+
+he input to the function call will need to be a bit different for standard evaluation versions of these functions. In many cases, this change is as easy as using formula notation (~) within the call, but in some cases it requires something more complex, including using the .dotsargument.
+
+Here is a table with examples of non-standard evaluation calls and their standard evaluation alternatives (these are all written assuming that the function is being used as a step in a piping flow, where the input data frame has already been defined earlier in the piping sequence):
+
+Non-standard evaluation version	Standard evaluation version
+filter(fips %in% counties)->filter_(~ fips %in% counties)
+mutate(max_rain = max(tot_precip)	->mutate_(max_rain = ~ max(tot_precip)
+summarize(tot_precip = sum(precip))	->summarize_(tot_precip = ~ sum(precip))
+group_by(storm_id, fips)	->group_by_(~ storm_id, ~ fips)
+aes(x = long, y = lat)	->aes_(x = ~ long, y = ~ lat)
+select(-start_date, -end_date)	->select_(.dots = c('start_date', 'end_date'))
+select(-start_date, -end_date)	->select_(.dots = c('-start_date', '-end_date'))
+spread(key, mean)	->spread_(key_col = 'key', value_col = 'mean')
+gather(key, mean)	->gather_(key_col = 'key', value_c
+#Summary
+Functions that use non-standard evaluation can cause problems within functions written for a package.
+The NSE functions in tidyverse packages all have standard evaluation analogues that should be used when writing functions that will be used by others.
+
+
+
+
