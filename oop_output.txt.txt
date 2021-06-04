@@ -1,0 +1,73 @@
+
+#Advanced R Programming 
+#Part 2: Longitudinal Data Class and Methods
+# Student name: Yayehirad Melsew
+
+
+> ## Read in the data
+> library(readr)
+> library(magrittr)
+> source("oop_code.R")
+> ## Load any other packages that you may need to execute your code
+> 
+> data <- read_csv("data/MIE.csv")
+> x <- make_LD(data)
+> print(class(x))
+[1] "LongitudinalData"
+attr(,"package")
+[1] ".GlobalEnv"
+> print(x)
+[1] "Longitudinal data with 10 subjects"
+> 
+> 
+> ## Subject 10 doesn't exist
+>  out <- subject(x, 10)
+> print(out)
+NULL
+> out <- subject(x, 14)
+> print(out)
+[1] "Subject ID:  14"
+> 
+> out <- subject(x, 54) %>% summary
+> print(out)
+visit living room    office       den  bedroom
+1     0    2.792601 13.255475        NA       NA
+2     1          NA  4.533921 13.450946       NA
+3     2          NA        NA  3.779225 4.193721
+> 
+> out <- subject(x, 14) %>% summary
+> print(out)
+visit   bedroom living room family  room
+1     0  4.786592     2.75000           NA
+2     1  3.401442          NA     8.426549
+3     2 18.583635    22.55069           NA
+
+> out <- subject(x, 44) %>% visit(0) %>% room("bedroom")
+> print(out)
+ID: 44 
+Visit: 0 
+Room: bedroom 
+> 
+> ## Show a summary of the pollutant values
+> out <- subject(x, 44) %>% visit(0) %>% room("bedroom") %>% summary
+> print(out)
+ value      
+ Min.   :  8.0  
+ 1st Qu.: 30.0  
+ Median : 51.0  
+ Mean   : 88.8  
+ 3rd Qu.: 80.0  
+ Max.   :911.0  
+> 
+> 
+> out <- subject(x, 44) %>% visit(1) %>% room("living room") %>% summary
+> print(out)
+
+ value        
+ Min.   :   2.75  
+ 1st Qu.:  14.00  
+ Median :  24.00  
+ Mean   :  41.37  
+ 3rd Qu.:  37.00  
+ Max.   :1607.00  
+> 

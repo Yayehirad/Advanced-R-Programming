@@ -1,0 +1,42 @@
+Student Name: Yayehirad Melsew
+
+Part 1: Factorial Function
+
+Summary of comparison for four different factorial functions, namely:
+Factorial_loop
+Factorial_reduce
+Factorial_func:
+Factorial_mem:
+
+1. Comparison for test_number =5
+
+> benchmark(test_number)
+Unit: microseconds
+                                    expr     min      lq      mean   median       uq     max neval cld
+     loop <- Factorial_loop(test_number)   3.021   3.399   4.74681   3.7770   4.5315  27.186   100 a  
+ reduce <- Factorial_reduce(test_number) 195.210 200.495 231.74435 203.5160 213.9000 569.014   100   c
+     func <- Factorial_func(test_number)  16.614  16.803  20.01610  17.5585  19.2570  61.924   100  b 
+       mem <- Factorial_mem(test_number)  16.991  17.370  20.82410  18.5020  20.3900  69.475   100  b 
+
+
+
+2. Comparison for test_number =100
+
+> benchmark(test_number)
+Unit: microseconds
+                                    expr     min       lq     mean   median       uq      max neval  cld
+     loop <- Factorial_loop(test_number)   7.552   8.3070  10.9995   9.4400  10.7615   32.472   100 a   
+ reduce <- Factorial_reduce(test_number) 528.236 539.1855 613.6218 581.2860 646.7955 1073.084   100    d
+     func <- Factorial_func(test_number) 285.074 288.6605 321.1215 292.0595 332.4605  620.365   100  b  
+       mem <- Factorial_mem(test_number) 300.555 303.9530 349.1946 309.9940 350.2060  715.516   100   c 
+
+
+3. Comparison for test_number =1000
+
+> benchmark(test_number)
+Unit: microseconds
+                                    expr      min        lq      mean    median       uq        max neval cld
+     loop <- Factorial_loop(test_number)   47.954   50.9735   59.3638   52.8615   56.260    161.983   100  a 
+ reduce <- Factorial_reduce(test_number) 3764.478 4113.1735 6333.1089 4308.9490 4749.208 186540.238   100   b
+     func <- Factorial_func(test_number) 3237.376 3550.0125 4052.2736 3769.0090 4196.241   8856.906   100   b
+       mem <- Factorial_mem(test_number) 3449.954 3745.9770 4496.7613 4019.1560 4614.222  12202.646   100   b

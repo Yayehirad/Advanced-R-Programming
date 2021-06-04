@@ -13,7 +13,7 @@ There a several key principles in object oriented programming which span across 
 A class is a blueprint for an object: it describes the parts of an object, how to make an object, and what the object is able to do.
 # S3
 Conveniently everything in R is an object. By “everything” I mean every single “thing” in R including numbers, functions, strings, data frames, lists, etc. If you want to know the class of an object in R you can simply use the class() function:
- In the S3 system you can arbitrarily assign a class to any object, which goes against most of what we discussed in the Object Oriented Principles section. Class assignments can be made using thestructure() function, or you can assign the class using class()and <-:
+ In the S3 system you can arbitrarily assign a class to any object, which goes against most of what we discussed in the Object Oriented Principles section. Class assignments can be made using the structure() function, or you can assign the class using class()and <-:
  
 ```{r}
 class(1)
@@ -24,10 +24,32 @@ class(special_num_2)<- "special_number"
 
 
 ```
+# S4
+The S4 system is slightly more restrictive than S3, but it’s similar in many ways. To create a new class in S4 you need to use thesetClass() function. You need to specify two or three arguments for this function: Class which is the name of the class as a string,slots, which is a named list of attributes for the class with the class of those attributes specified, and optionally contains which includes the super-class of they class you’re specifying (if there is a super-class). 
+```{r}
 
 
+```
 
+# Reference Classes
+With reference classes we leave the world of R’s old object oriented systems and enter the philosophies of other prominent object oriented programming languages. We can use the setRefClass() function to define a class’ fields, methods, and super-classes. 
+# Summary
+R has three object oriented systems: S3, S4, and Reference Classes.
+Reference Classes are the most similar to classes and objects in other programming languages.
+Classes are blueprints for an object.
+Objects are individual instances of a class.
+Methods are functions that are associated with a particular class.
+Constructors are methods that create objects.
+Everything in R is an object.
+S3 is a liberal object oriented system that allows you to assign a class to any object.
+S4 is a more strict object oriented system that build upon ideas in S3.
+Reference Classes are a modern object oriented system that is similar to Java, C++, Python, or Ruby.
 
+# Gaining Your tidyverse Citizenship
+# 1 Reuse existing data structures
+# 2 Compose simple functions with the pipe
+# 3 Embrace functional programming
+# 4 Design for humans
 
 
 
